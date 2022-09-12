@@ -13,6 +13,7 @@
     <slot
       v-else-if="renderData != null"
       :args="renderData.args"
+      :theme="renderData.theme"
       :disabled="renderData.disabled"
     ></slot>
   </div>

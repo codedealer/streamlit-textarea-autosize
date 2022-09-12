@@ -1,7 +1,7 @@
 <template>
   <div>
     <p>Hello, {{ args.name }}! &nbsp;</p>
-    <button @click="onClicked">Click Me!</button>
+    <button @click="onClicked(theme)">Click Me!</button>
   </div>
 </template>
 
@@ -11,15 +11,16 @@ import { Streamlit } from "streamlit-component-lib"
 import { useStreamlit } from "./streamlit"
 
 export default {
-  name: "component",
-  props: ['args'], // Arguments passed from Python
+  name: "TextareaAutosize",
+  props: ['args', 'theme', 'disabled'], // Arguments passed from Python
   setup () {
     useStreamlit(); // lifecycle hooks for automatic Streamlit resize
 
     const numClicks = ref(0)
-    const onClicked = () => {
+    const onClicked = (o) => {
       numClicks.value++
       Streamlit.setComponentValue(numClicks.value)
+      console.log(o);
     }
 
     return {

@@ -1,29 +1,18 @@
-<!--
-  We bootstrap our Component to Streamlit with our scoped slot in the top-level App.
-  This is where scoped slot passes Streamlit `args` data from itself to children MyComponent.
-  You should not have to edit this, but are free to do so :)
--->
 <template>
-  <WithStreamlitConnection v-slot="{ args }">
-    <Component :args="args" />
+  <WithStreamlitConnection v-slot="{ args, theme, disabled }">
+    <TextareaAutosize :args="args" :theme="theme" :disabled="disabled" />
   </WithStreamlitConnection>
 </template>
 
 <script lang="ts">
 import { defineComponent } from 'vue'
-import Component from './Component.vue'
-
-// "withStreamlitConnection" is a scoped slot. It bootstraps the
-// connection between your component and the Streamlit app, and handles
-// passing arguments from Python -> Component.
-//
-// You don't need to edit withStreamlitConnection (but you're welcome to!).
+import TextareaAutosize from './TextareaAutosize.vue'
 import WithStreamlitConnection from "./streamlit/WithStreamlitConnection.vue"
 
 export default defineComponent({
   name: 'App',
   components: {
-    Component,
+    TextareaAutosize,
     WithStreamlitConnection,
   },
 })
