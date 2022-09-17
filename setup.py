@@ -1,7 +1,7 @@
 import setuptools
 
 setuptools.setup(
-    name="st_textarea_autosize",
+    name="streamlit_textarea_autosize",
     version="0.1.0",
     author="Thomas Mello",
     author_email="",

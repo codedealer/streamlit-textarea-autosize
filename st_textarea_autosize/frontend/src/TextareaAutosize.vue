@@ -1,5 +1,5 @@
 <template>
-  <div class="textarea-autosize-container" :style="rootStyles">
+  <div class="textarea-autosize-container" :style="rootStyles" :id="args.key">
     <label
       v-if="args.label"
       :class="args.labelClass"
@@ -8,6 +8,7 @@
     <textarea
       @change="onChange"
       @focus="onChange"
+      @keydown.enter="onSubmit"
       v-model="v"
       :style="styles"
       :rows="args.rows"
@@ -24,7 +25,7 @@
 <script setup lang="ts">
 import { Streamlit, Theme } from "streamlit-component-lib"
 import { useStreamlit } from "./streamlit"
-import { computed, nextTick, ref, watch } from "vue";
+import {computed, nextTick, onMounted, ref, watch} from "vue";
 
 interface IProps {
   args: any;
@@ -38,9 +39,14 @@ const props = defineProps<IProps>();
 const v = ref('');
 v.value = props.args.value as string;
 const textarea = ref<HTMLTextAreaElement | null>(null); // html element
-textarea.value!.style.height = Number(props.args.minHeight) > 0
-               ? `${Number(props.args.minHeight)}px`
-               : `30px`
+
+onMounted(() => {
+  textarea.value!.style.height = Number(props.args.minHeight) > 0
+                                ? `${Number(props.args.minHeight)}px`
+                                : `30px`;
+  Streamlit.setFrameHeight()
+})
+
 const isScrollEnabled = ref(false);
 const paddingValue = 8;
 
@@ -59,6 +65,49 @@ const rootStyles = computed(() => ({
 const onChange = () => {
   Streamlit.setComponentValue(v.value)
 }
+const onSubmit = (e: KeyboardEvent) => {
+  if (!props.args.submitForm) return true;
+
+  // just add new line on CTRL+ENTER
+  if (e.ctrlKey) {
+    v.value += "\n";
+    return true;
+  }
+
+  e.preventDefault();
+  Streamlit.setComponentValue(v.value);
+
+  // we need to wait a bit for the message to reach streamlit server
+  setTimeout(() => {
+    // trigger submit of the closest form button
+    let rootDoc = null;
+    try {
+      rootDoc = window.parent.document;
+    } catch (e) {
+      console.error(e);
+      console.error("Couldn't escape the iframe. Automatic submit is impossible");
+      return false;
+    }
+
+    for (let i = 0, iframes = Array.from(rootDoc.querySelectorAll('iframe'));
+         i < iframes.length; i++) {
+      const body = iframes[i].contentDocument?.body;
+      if (!body) throw new Error("Failed to access the iframe. Automatic submit is impossible");
+
+      const el = body.querySelector(`#${props.args.key}`);
+      if (!el) continue;
+
+      const form = iframes[i].closest(`[data-testid="stForm"]`);
+      if (!form) throw new Error(`Couldn't find form for ${props.args.key}`);
+
+      const button = form.querySelector('button[kind="formSubmit"]');
+      if (!button) throw new Error("Couldn't find a submit button in a form");
+
+      (button as HTMLButtonElement).click();
+    }
+  }, 500);
+}
+
 const resize = () => {
   nextTick(() => {
     textarea.value!.style.height = `auto`;
@@ -83,20 +132,15 @@ const resize = () => {
 }
 
 watch(v, resize)
-onChange() // init value
 </script>
 
 <style scoped>
   p { margin-block: 0 20px;}
   .textarea-autosize-container {
-    /*margin: 4px;*/
     font-family: var(--font);
     box-sizing: border-box;
-    /*display: flex;*/
-    /*flex-direction: column;*/
   }
   .cd-textarea-label {
-    /*flex: 0 0 auto;*/
     display: inline-block;
     margin-bottom: var(--padding);
     font-size: 14px;
@@ -105,7 +149,6 @@ onChange() // init value
     display: block;
     box-sizing: border-box;
     width: 100%;
-    /*flex: 1 0 100%;*/
     font-family: var(--font);
     background-color: var(--background-color);
     color: var(--text-color);
