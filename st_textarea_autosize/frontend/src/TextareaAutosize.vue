@@ -38,9 +38,9 @@ const props = defineProps<IProps>();
 const v = ref('');
 v.value = props.args.value as string;
 const textarea = ref<HTMLTextAreaElement | null>(null); // html element
-const height = Number(props.args.minHeight) > 0
-               ? ref(`${Number(props.args.minHeight)}px`)
-               : ref(`30px`)
+textarea.value!.style.height = Number(props.args.minHeight) > 0
+               ? `${Number(props.args.minHeight)}px`
+               : `30px`
 const isScrollEnabled = ref(false);
 const paddingValue = 8;
 
@@ -63,17 +63,19 @@ const resize = () => {
   nextTick(() => {
     textarea.value!.style.height = `auto`;
     const scrollHeight = textarea.value!.scrollHeight;
-    textarea.value!.style.height = `${Number(scrollHeight)}px`;
 
     if (Number(props.args.minHeight) > 0 && scrollHeight < props.args.minHeight) {
       textarea.value!.style.height = `${Number(props.args.minHeight)}px`;
     } else if (Number(props.args.maxHeight) > 0) {
       if (scrollHeight > Number(props.args.maxHeight)) {
         textarea.value!.style.height = `${Number(props.args.maxHeight)}px`;
-        //isScrollEnabled.value = true;
+        isScrollEnabled.value = true;
       } else {
-        //isScrollEnabled.value = false;
+        isScrollEnabled.value = false;
+        textarea.value!.style.height = `${Number(scrollHeight)}px`;
       }
+    } else {
+      textarea.value!.style.height = `${Number(scrollHeight)}px`;
     }
 
     Streamlit.setFrameHeight()
