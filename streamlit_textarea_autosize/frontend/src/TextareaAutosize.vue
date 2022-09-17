@@ -68,11 +68,8 @@ const onChange = () => {
 const onSubmit = (e: KeyboardEvent) => {
   if (!props.args.submitForm) return true;
 
-  // just add new line on CTRL+ENTER
-  if (e.ctrlKey || e.shiftKey) {
-    v.value += "\n";
-    return true;
-  }
+  // just add new line on SHIFT+ENTER
+  if (e.shiftKey) return true;
 
   e.preventDefault();
   Streamlit.setComponentValue(v.value);

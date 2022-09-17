@@ -2,7 +2,7 @@ import setuptools
 
 setuptools.setup(
     name="streamlit_textarea_autosize",
-    version="0.1.1",
+    version="1.0.3",
     author="Thomas Mello",
     author_email="",
     description="Streamlit text input that resizes automatically",
