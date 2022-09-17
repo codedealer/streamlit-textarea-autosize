@@ -1,1 +1,1 @@
-recursive-include st_textarea_autosize/frontend/dist *
+recursive-include streamlit_textarea_autosize/frontend/dist *
